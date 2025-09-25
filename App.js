@@ -1,7 +1,7 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import HomeScreen from "./src/screens/HomeScreen";
-import ProvidersScreen from "./src/screens/ProvidersScreen"; // add this
+import ProvidersScreen from "./src/screens/ProvidersScreen"; // Add this line if using a second screen
 
 const Stack = createNativeStackNavigator();
 
