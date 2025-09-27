@@ -1,11 +1,19 @@
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Image,
+  ImageSourcePropType,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 const BLUE = "#1E90FF";
 const PURPLE = "#800080";
 
 export default function Landing() {
   return (
-    <View style={{ flex: 1, backgroundColor: "#fff" }}>
+    <View style={styles.screen}>
       <ScrollView contentContainerStyle={styles.container}>
         {/* Header */}
         <View style={styles.header}>
@@ -24,7 +32,7 @@ export default function Landing() {
           </TouchableOpacity>
         </View>
 
-        {/* Feature band with images */}
+        {/* Feature band */}
         <View style={styles.band}>
           <View style={styles.featuresRow}>
             <Feature
@@ -41,23 +49,27 @@ export default function Landing() {
             />
             <Feature
               label="NDIS Registered"
-              img={require("../../assets/images/ndis.png")}
+              img={require("../../assets/images/ndis.png")} 
             />
           </View>
         </View>
 
-        {/* Headline */}
+        {/* Headline + facts */}
         <View style={styles.headlineWrap}>
           <Text style={styles.headline}>
             The ability to choose, the ability to change
           </Text>
 
-        <View style={styles.factList}>
-          <Text style={styles.fact}>Do you have an NDIS plan?</Text>
-          <Text style={styles.fact}>Have you been funded for Support Coordination?</Text>
-          <Text style={styles.fact}>Do you want an expert that can help you navigate NDIS?</Text>
-          <Text style={styles.fact}>Do you want value for money?</Text>
-        </View>
+          <View style={styles.factList}>
+            <Text style={styles.fact}>Do you have an NDIS plan?</Text>
+            <Text style={styles.fact}>
+              Have you been funded for Support Coordination?
+            </Text>
+            <Text style={styles.fact}>
+              Do you want an expert that can help you navigate NDIS?
+            </Text>
+            <Text style={styles.fact}>Do you want value for money?</Text>
+          </View>
 
           <TouchableOpacity style={styles.cta}>
             <Text style={styles.ctaText}>Contact Us</Text>
@@ -65,7 +77,7 @@ export default function Landing() {
         </View>
       </ScrollView>
 
-      {/* Floating purple help button */}
+      {/* Floating help */}
       <TouchableOpacity style={styles.fab}>
         <Text style={styles.fabText}>?</Text>
       </TouchableOpacity>
@@ -73,12 +85,16 @@ export default function Landing() {
   );
 }
 
-function Feature({ label, img }: { label: string; img: any }) {
+function Feature({
+  label,
+  img,
+}: {
+  label: string;
+  img: ImageSourcePropType;
+}) {
   return (
     <View style={styles.feature}>
-      {}
       <View style={styles.circle}>
-        {}
         <Image source={img} style={styles.circleImg} />
       </View>
       <Text style={styles.featureText}>{label}</Text>
@@ -87,18 +103,23 @@ function Feature({ label, img }: { label: string; img: any }) {
 }
 
 const styles = StyleSheet.create({
+ 
+  screen: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
   container: {
     paddingBottom: 80,
   },
 
   header: {
-  paddingTop: 12, 
-  paddingBottom: 8,
-  paddingHorizontal: 16,
-  flexDirection: "row",
-  alignItems: "center",
-  justifyContent: "space-between",
-},
+    paddingTop: 12,
+    paddingBottom: 8,
+    paddingHorizontal: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
   pill: {
     paddingVertical: 6,
     paddingHorizontal: 14,
@@ -120,45 +141,41 @@ const styles = StyleSheet.create({
   },
 
   band: {
-  backgroundColor: BLUE,
-  paddingVertical: 40,  
-  paddingHorizontal: 16, 
-  marginTop: 16,        
-},
-
-feature: {
-  width: "24%",          
-  alignItems: "center",
-},
-
-featuresRow: {
-  flexDirection: "row",
-  justifyContent: "space-between",
-  alignItems: "center",
-},
-
-circle: {
-  width: 64,             // ⬆ was 48
-  height: 64,            // ⬆ was 48
-  borderRadius: 32,
-  backgroundColor: "#fff",
-  overflow: "hidden",
-  alignItems: "center",
-  justifyContent: "center",
-  marginBottom: 8,      
-},
-circleImg: {
-  width: "100%",
-  height: "100%",
-  resizeMode: "cover",
-},
-
-featureText: {
-  color: "#fff",
-  fontSize: 12,          // ⬆ was 10
-  fontWeight: "700",
-  textAlign: "center",
-},
+    backgroundColor: BLUE,
+    paddingVertical: 40,
+    paddingHorizontal: 16,
+    marginTop: 16,
+  },
+  featuresRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  feature: {
+    width: "24%",
+    alignItems: "center",
+  },
+  circle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: "#fff",
+    overflow: "hidden",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
+  },
+  circleImg: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
+  },
+  featureText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "700",
+    textAlign: "center",
+  },
 
   headlineWrap: {
     paddingHorizontal: 18,
@@ -171,26 +188,15 @@ featureText: {
     fontWeight: "800",
     textAlign: "center",
   },
-  checklist: {
-    marginTop: 14,
-    alignSelf: "stretch",
+  factList: {
+    marginTop: 20,
+    alignItems: "center",
+    gap: 8 as any, 
   },
-  checkRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    marginBottom: 6,
-    paddingHorizontal: 6,
-  },
-  tick: {
-    color: BLUE,
-    fontWeight: "900",
-    marginRight: 8,
-    lineHeight: 18,
-  },
-  checkText: {
-    color: "#2f2f2f",
-    fontSize: 13,
-    flexShrink: 1,
+  fact: {
+    fontSize: 16,
+    textAlign: "center",
+    color: "#333",
   },
 
   cta: {
@@ -205,18 +211,6 @@ featureText: {
     fontWeight: "700",
     fontSize: 14,
   },
-
-  factList: {
-  marginTop: 20,
-  alignItems: "center", 
-},
-
-fact: {
-  fontSize: 16,
-  textAlign: "center",
-  marginBottom: 8,
-  color: "#333",
-},
 
   fab: {
     position: "absolute",
@@ -240,4 +234,3 @@ fact: {
     fontWeight: "800",
   },
 });
-
