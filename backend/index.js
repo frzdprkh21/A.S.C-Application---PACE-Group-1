@@ -6,7 +6,7 @@ const jwt = require("jsonwebtoken");
 
 const app = express();
 const PORT = 4000;
-const JWT_SECRET = "supersecret"; // 🔒 change this in real projects!
+const JWT_SECRET = "supersecret"; // change this in real projects!
 
 app.use(cors());
 app.use(express.json());
@@ -54,7 +54,7 @@ function authenticate(req, res, next) {
 // --------------------- ROUTES ---------------------
 // Home route (for quick test)
 app.get("/", (req, res) => {
-  res.send("Backend is running 🎉 Use /providers or /auth routes.");
+  res.send("Backend is running. Use /providers, /auth, or /chatbot routes.");
 });
 
 // Register
@@ -116,12 +116,76 @@ app.post("/providers", authenticate, (req, res) => {
         serviceType,
         location,
         description,
-        createdBy: req.user.id
+        createdBy: req.user.id,
       });
     }
   );
 });
 
+// --------------------- CHATBOT ROUTE ---------------------
+// Very simple intent/FAQ responder with optional provider lookup
+app.post("/chatbot", (req, res) => {
+  const { message } = req.body || {};
+  if (!message || typeof message !== "string") {
+    return res.status(400).json({ reply: "Please provide a message string." });
+  }
+
+  const q = message.toLowerCase().trim();
+
+  // Tiny FAQ
+  const faq = {
+    "what is ndis":
+      "The NDIS (National Disability Insurance Scheme) provides funding for Australians with disability to access supports and services.",
+    "how do i contact":
+      "You can reach our team via the Contact Us option in the app.",
+    "hello": "Hello! How can I help you today?",
+    "hi": "Hi there! Ask me about NDIS or finding providers.",
+  };
+
+  const faqKey = Object.keys(faq).find((k) => q.includes(k));
+  if (faqKey) {
+    return res.json({ reply: faq[faqKey] });
+  }
+
+  // Simple provider intent detection
+  const providerIntent = ["find", "provider", "service", "near", "in ", "around"].some((w) =>
+    q.includes(w)
+  );
+
+  if (providerIntent) {
+    // Try to match providers by name, serviceType, or location
+    const like = `%${q.replace(/%/g, "")}%`;
+    db.all(
+      `SELECT providerName, serviceType, location FROM providers
+       WHERE lower(providerName) LIKE ? OR lower(serviceType) LIKE ? OR lower(location) LIKE ?
+       LIMIT 5`,
+      [like, like, like],
+      (err, rows) => {
+        if (err) {
+          return res.json({ reply: "Sorry, I couldn't search providers right now." });
+        }
+        if (!rows || rows.length === 0) {
+          return res.json({ reply: "I couldn't find matching providers. Try a different service or location." });
+        }
+
+        const list = rows
+          .map((r) => `• ${r.providerName} — ${r.serviceType} (${r.location})`)
+          .join("\n");
+        const reply = `Here are some providers I found:\n${list}`;
+        return res.json({ reply });
+      }
+    );
+    return; // respond in callback
+  }
+
+  // Generic fallback
+  return res.json({
+    reply:
+      "I'm not sure yet, but I can help with NDIS basics and finding providers. Try asking: 'What is NDIS?' or 'Find physiotherapy in Forster'.",
+  });
+});
+
 // --------------------- SERVER START ---------------------
 
-app.listen(PORT, () => console.log(`✅ Backend running on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`Backend running on http://localhost:${PORT}`));
+

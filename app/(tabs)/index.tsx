@@ -47,7 +47,6 @@ export default function Landing() {
 
   }, []);
 
-  // Filter providers when search changes
   useEffect(() => {
     if (!search.trim()) {
       setFiltered(providers);
