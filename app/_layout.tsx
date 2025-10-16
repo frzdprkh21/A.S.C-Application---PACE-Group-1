@@ -1,26 +1,36 @@
-
-import { Stack, useRouter, useSegments } from "expo-router";
+import { Stack, usePathname, useRouter } from "expo-router";
 import { useEffect } from "react";
+import { ActivityIndicator, View } from "react-native";
 import { AuthProvider, useAuth } from "./Auth/Authentication";
 
 function AuthGate({ children }: { children: React.ReactNode }) {
   const { user, initializing } = useAuth();
-  const segments = useSegments();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (initializing) return;
 
-    const inTabs = segments[0] === "(tabs)";
+    const onLogin = "/(tabs)/LoginScreen";
+    const onHome = "/(tabs)/employee_home";
 
-    if (!user && !inTabs) {
-      router.replace("/(tabs)/LoginScreen");
+    if (!user && pathname !== onLogin) {
+      router.replace(onLogin);
       return;
     }
-    if (user && !inTabs) {
-      router.replace("/(tabs)/employee_home");
+
+    if (user && (pathname === onLogin || pathname === "/" || pathname === "")) {
+      router.replace(onHome);
     }
-  }, [user, initializing, segments]);
+  }, [user, initializing, pathname]);
+
+  if (initializing) {
+    return (
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <ActivityIndicator size="large" color="#1E90FF" />
+      </View>
+    );
+  }
 
   return <>{children}</>;
 }

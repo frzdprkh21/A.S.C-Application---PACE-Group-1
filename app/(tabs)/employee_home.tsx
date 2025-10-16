@@ -1,32 +1,42 @@
+// app/(tabs)/employee_home.tsx
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-    Alert,
-    Image,
-    SafeAreaView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  Image,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useAuth } from "../Auth/Authentication";
 
-const BLUE = "#1E90FF";
 const LINE = "#e5e7eb";
 
-export default function Home() {
+export default function EmployeeHome() {
   const router = useRouter();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
 
-  const [user] = useState({
-    name: "Zain Ward",
+  const [localUser] = useState({
+    name: user?.name ?? "Staff Member",
     avatar: require("../../assets/images/example_profile.png"),
   });
 
-  const Row = ({ title, onPress }: { title: string; onPress: () => void }) => (
+  const Row = ({
+    title,
+    onPress,
+    danger,
+  }: {
+    title: string;
+    onPress: () => void;
+    danger?: boolean;
+  }) => (
     <TouchableOpacity onPress={onPress} style={styles.row}>
-      <Text style={styles.rowText}>{title}</Text>
-      <Text style={styles.chevron}>{">"}</Text>
+      <Text style={[styles.rowText, danger && { color: "#e11d48", fontWeight: "700" }]}>
+        {title}
+      </Text>
+      <Text style={[styles.chevron, danger && { color: "#e11d48" }]}>{">"}</Text>
     </TouchableOpacity>
   );
 
@@ -37,8 +47,7 @@ export default function Home() {
         text: "Log out",
         style: "destructive",
         onPress: async () => {
-          await logout();
-          router.replace("/LoginScreen");
+          await logout(); // AuthGate will handle redirect automatically
         },
       },
     ]);
@@ -48,11 +57,13 @@ export default function Home() {
     <SafeAreaView style={styles.screen}>
       <View style={styles.card}>
         <View style={styles.headerRow}>
-          <Image source={user.avatar} style={styles.avatar} />
-          <Text style={styles.name}>{user.name}</Text>
+          <Image source={localUser.avatar} style={styles.avatar} />
+          <Text style={styles.name}>{localUser.name}</Text>
         </View>
 
-        <Row title="Log out" onPress={handleLogout} />
+        
+
+        <Row title="Log out" onPress={handleLogout} danger />
       </View>
 
       <View style={styles.bodyPlaceholder} />

@@ -8,8 +8,7 @@ export default function TabsLayout() {
       <Tabs.Screen name="catalogue" options={{ title: "Catalogue" }} />
       <Tabs.Screen name="chatbot" options={{ title: "Chatbot" }} />
       <Tabs.Screen name="about" options={{ title: "About" }} />
-      <Tabs.Screen name="LoginScreen" options={{ href: null }} /> 
-      {/* keep login in the group but hidden from tab bar */}
+      <Tabs.Screen name="LoginScreen" options={{ title: "Login"}} /> 
     </Tabs>
   );
 }

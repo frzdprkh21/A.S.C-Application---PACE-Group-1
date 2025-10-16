@@ -1,56 +1,106 @@
+import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useRef, useState } from "react";
 import {
   FlatList,
+  Image,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
+
+const BLUE = "#1E90FF";
+const PURPLE = "#8A2BE2";
 
 export default function Chatbot() {
   const [messages, setMessages] = useState([
-    { id: "1", sender: "bot", text: "Hi 👋 I'm your support assistant. Ask me about NDIS or services!" },
+    {
+      id: "1",
+      sender: "bot",
+      text: "Hi I’m here to answer your NDIS and disability-related questions. You can ask me about funding, eligibility, services, or supports.",
+    },
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [fontSize, setFontSize] = useState(14);
+  const [highContrast, setHighContrast] = useState(false);
   const flatListRef = useRef<FlatList>(null);
 
+  // sample chatbot FAQ
   const faq: Record<string, string> = {
-    "what is ndis": "The NDIS (National Disability Insurance Scheme) provides funding for Australians with disability to access supports and services.",
-    "find providers": "You can browse providers in the catalogue section of the app.",
-    "contact": "You can reach out to our team via the Contact Us button on the home screen.",
-    "hello": "Hello! How can I help you today?",
+    "what is ndis":
+      "The NDIS (National Disability Insurance Scheme) provides funding for Australians with disability to access supports and services.",
+    "how do i apply":
+      "You can apply via the NDIS website or contact a Local Area Coordinator.",
+    "support coordination":
+      "Support Coordination helps you connect with providers and use your NDIS plan effectively.",
   };
 
   const sendMessage = () => {
     if (!input.trim()) return;
 
-    const userMessage = { id: Date.now().toString(), sender: "user", text: input };
+    const userMessage = {
+      id: Date.now().toString(),
+      sender: "user",
+      text: input,
+    };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
 
-    // simulate typing delay
     setIsTyping(true);
     setTimeout(() => {
-      let reply = "Hmm, I’m not sure about that — but I can connect you with our support team.";
-      const query = input.toLowerCase();
-      const key = Object.keys(faq).find((k) => query.includes(k));
-      if (key) reply = faq[key];
+      let reply =
+        "Hmm, I’m not sure about that — but I can connect you with our support team.";
+      const q = input.toLowerCase();
+      const match = Object.keys(faq).find((key) => q.includes(key));
+      if (match) reply = faq[match];
 
-      const botMessage = { id: Date.now().toString() + "_bot", sender: "bot", text: reply };
-      setMessages((prev) => [...prev, botMessage]);
+      setMessages((prev) => [
+        ...prev,
+        { id: Date.now().toString() + "_bot", sender: "bot", text: reply },
+      ]);
       setIsTyping(false);
     }, 1000);
   };
 
-  // always scroll to bottom when messages change
+  // auto-scroll to latest
   useEffect(() => {
     flatListRef.current?.scrollToEnd({ animated: true });
   }, [messages]);
 
+
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.screen,
+        highContrast && { backgroundColor: "#000" },
+      ]}
+    >
+      {/* HEADER */}
+      <LinearGradient
+        colors={[BLUE, PURPLE]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.header}
+      >
+        <View style={styles.headerContent}>
+          <Image
+            source={require("../../assets/images/logo_small.png")}
+            style={styles.logo}
+          />
+          <Text style={styles.headerTitle}>NDIS Help Bot</Text>
+        </View>
+
+        <View style={styles.headerButtons}>
+          <Text style={styles.headerBtn}>–</Text>
+          <Text style={styles.headerBtn}>□</Text>
+          <Text style={styles.headerBtn}>X</Text>
+        </View>
+      </LinearGradient>
+
+
+      {/* Chat area */}
       <FlatList
         ref={flatListRef}
         data={messages}
@@ -60,22 +110,44 @@ export default function Chatbot() {
             style={[
               styles.message,
               item.sender === "user" ? styles.userMessage : styles.botMessage,
+              highContrast && {
+                backgroundColor: item.sender === "user" ? "#00A" : "#222",
+              },
             ]}
           >
-            <Text style={styles.sender}>
-              {item.sender === "user" ? "You" : "Bot"}
+            <Text
+              style={[
+                styles.messageText,
+                { fontSize },
+                highContrast && { color: "#fff" },
+              ]}
+            >
+              {item.text}
             </Text>
-            <Text style={styles.messageText}>{item.text}</Text>
           </View>
         )}
+        contentContainerStyle={{ paddingHorizontal: 10, paddingBottom: 10 }}
       />
 
-      {isTyping && <Text style={styles.typing}>Bot is typing...</Text>}
+      {isTyping && (
+        <Text style={[styles.typing, highContrast && { color: "#fff" }]}>
+          Bot is typing...
+        </Text>
+      )}
 
+      {/* Input row */}
       <View style={styles.inputRow}>
         <TextInput
-          style={styles.input}
-          placeholder="Type your message..."
+          style={[
+            styles.input,
+            highContrast && {
+              backgroundColor: "#111",
+              color: "#fff",
+              borderColor: "#555",
+            },
+          ]}
+          placeholder="Type message here..."
+          placeholderTextColor={highContrast ? "#aaa" : "#666"}
           value={input}
           onChangeText={setInput}
         />
@@ -88,7 +160,39 @@ export default function Chatbot() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff", padding: 10 },
+  screen: { flex: 1, backgroundColor: "#fff" },
+
+  header: {
+    height: 70,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    elevation: 4,
+  },
+  headerContent: { flexDirection: "row", alignItems: "center" },
+  logo: { width: 36, height: 36, borderRadius: 18, marginRight: 8 },
+  headerTitle: { color: "#fff", fontSize: 18, fontWeight: "bold" },
+  headerButtons: { flexDirection: "row", gap: 8 },
+  headerBtn: { color: "#fff", fontSize: 18 },
+
+  accessibility: {
+    alignItems: "center",
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderColor: "#eee",
+  },
+  accessibilityTitle: { fontWeight: "600", marginBottom: 6 },
+  optionBtn: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 6,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    marginVertical: 4,
+  },
+  optionText: { fontSize: 14, fontWeight: "500" },
+
   message: {
     padding: 10,
     borderRadius: 10,
@@ -103,20 +207,15 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
     backgroundColor: "#eee",
   },
-  sender: { fontSize: 10, fontWeight: "bold", marginBottom: 2 },
   messageText: { color: "#000", fontSize: 14 },
-  typing: {
-    fontStyle: "italic",
-    color: "#555",
-    marginBottom: 5,
-    marginLeft: 10,
-  },
+  typing: { fontStyle: "italic", color: "#555", paddingLeft: 12, marginBottom: 5 },
+
   inputRow: {
     flexDirection: "row",
     alignItems: "center",
     borderTopWidth: 1,
     borderColor: "#ddd",
-    paddingTop: 6,
+    padding: 8,
   },
   input: {
     flex: 1,

@@ -1,4 +1,3 @@
-// app/Auth/Authentication.tsx
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
@@ -14,7 +13,7 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-/** Storage helpers: prefer SecureStore, gracefully fall back to AsyncStorage (web/dev). */
+/** Prefer SecureStore, fallback to AsyncStorage (web/dev). */
 async function storeGet(key: string) {
   try {
     if (await SecureStore.isAvailableAsync()) {
@@ -23,7 +22,6 @@ async function storeGet(key: string) {
   } catch {}
   return await AsyncStorage.getItem(key);
 }
-
 async function storeSet(key: string, value: string) {
   try {
     if (await SecureStore.isAvailableAsync()) {
@@ -32,7 +30,6 @@ async function storeSet(key: string, value: string) {
   } catch {}
   return await AsyncStorage.setItem(key, value);
 }
-
 async function storeDelete(key: string) {
   try {
     if (await SecureStore.isAvailableAsync()) {
@@ -57,9 +54,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = async (staffId: string, password: string) => {
-    // TODO: replace with your real API call
-    await new Promise((r) => setTimeout(r, 600));
-    const isValid = staffId === "1234" && password === "password123";
+    await new Promise((r) => setTimeout(r, 400));
+    const isValid = staffId === "4568744884" && password === "password123";
     if (!isValid) throw new Error("Invalid credentials");
 
     const token = "demo.jwt.token";
@@ -78,11 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   };
 
-  const value = useMemo(
-    () => ({ user, initializing, login, logout }),
-    [user, initializing]
-  );
-
+  const value = useMemo(() => ({ user, initializing, login, logout }), [user, initializing]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
