@@ -9,6 +9,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Platform,
 } from "react-native";
 import { useAuth } from "../Auth/Authentication";
 
@@ -41,6 +42,11 @@ export default function EmployeeHome() {
   );
 
   const handleLogout = () => {
+    if (Platform.OS === "web") {
+      const ok = typeof window !== "undefined" && window.confirm("Log out now?");
+      if (ok) logout();
+      return;
+    }
     Alert.alert("Log out", "Are you sure you want to log out?", [
       { text: "Cancel", style: "cancel" },
       {

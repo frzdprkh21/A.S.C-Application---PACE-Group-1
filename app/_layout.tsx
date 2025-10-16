@@ -11,16 +11,21 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (initializing) return;
 
-    const onLogin = "/(tabs)/LoginScreen";
-    const onHome = "/(tabs)/employee_home";
+    // Canonical paths without the group name.
+    const loginPath = "/LoginScreen";
+    const staffPath = "/employee_home";
 
-    if (!user && pathname !== onLogin) {
-      router.replace(onLogin);
+    // When not authenticated, only protect staff routes; allow landing/home.
+    if (!user) {
+      if (pathname === staffPath) {
+        router.replace(loginPath);
+      }
       return;
     }
 
-    if (user && (pathname === onLogin || pathname === "/" || pathname === "")) {
-      router.replace(onHome);
+    // When authenticated, don't trap users on staff; just prevent visiting login.
+    if (pathname === loginPath) {
+      router.replace(staffPath);
     }
   }, [user, initializing, pathname]);
 

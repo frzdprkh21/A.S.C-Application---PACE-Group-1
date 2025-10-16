@@ -14,15 +14,11 @@ import { API_BASE_URL } from "../config";
 const BLUE = "#1E90FF";
 const PURPLE = "#8A2BE2";
 
-type Message = { id: string; sender: "bot" | "user"; text: string };
-
 export default function Chatbot() {
-  // Debug: show which API base is used at runtime
-  console.log("[Chatbot] API_BASE_URL:", API_BASE_URL);
-  const [messages, setMessages] = useState<Message[]>([
+  const [messages, setMessages] = useState([
     {
       id: "1",
-      sender: "bot",
+      sender: "bot" as const,
       text:
         "Hi, I'm here to answer your NDIS and disability-related questions. You can ask me about funding, eligibility, services, or supports.",
     },
@@ -31,14 +27,14 @@ export default function Chatbot() {
   const [isTyping, setIsTyping] = useState(false);
   const [fontSize] = useState(14);
   const [highContrast] = useState(false);
-  const flatListRef = useRef<FlatList<Message>>(null);
+  const flatListRef = useRef<FlatList<any>>(null);
 
   const sendMessage = async () => {
     if (!input.trim()) return;
 
-    const userMessage: Message = {
+    const userMessage = {
       id: Date.now().toString(),
-      sender: "user",
+      sender: "user" as const,
       text: input,
     };
     setMessages((prev) => [...prev, userMessage]);
@@ -46,15 +42,12 @@ export default function Chatbot() {
 
     setIsTyping(true);
     try {
-      const url = `${API_BASE_URL}/chatbot`;
-      console.log("[Chatbot] POST", url);
-      const resp = await fetch(url, {
+      const resp = await fetch(`${API_BASE_URL}/chatbot`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: userMessage.text }),
       });
       let reply = "Sorry, I couldn't get a response right now.";
-      console.log("[Chatbot] Response status:", resp.status);
       if (resp.ok) {
         const data = await resp.json();
         reply = (data?.reply || "").toString();
@@ -64,7 +57,6 @@ export default function Chatbot() {
         { id: Date.now().toString() + "_bot", sender: "bot", text: reply },
       ]);
     } catch (e) {
-      console.error("[Chatbot] Fetch error:", e);
       setMessages((prev) => [
         ...prev,
         { id: Date.now().toString() + "_bot", sender: "bot", text: "Network error. Please try again." },

@@ -38,27 +38,6 @@ db.serialize(() => {
     createdBy INTEGER,
     FOREIGN KEY(createdBy) REFERENCES users(id)
   )`);
-
-  // Seed demo providers if table is empty
-  db.get("SELECT COUNT(*) as count FROM providers", (err, row) => {
-    if (err) {
-      console.error("Seed check failed:", err);
-      return;
-    }
-    if (row && row.count === 0) {
-      const demo = [
-        { providerName: "Care First", serviceType: "Disability Support", location: "Forster", description: "In-home support, community access, and daily living assistance." },
-        { providerName: "Better Living", serviceType: "Occupational Therapy", location: "Tuncurry", description: "Functional assessments, equipment prescription, and home modifications." },
-        { providerName: "Freedom Mobility", serviceType: "Physiotherapy", location: "Coomba Park", description: "Pain management, mobility programs, and hydrotherapy sessions." },
-        { providerName: "Sunrise Speech", serviceType: "Speech Pathology", location: "Taree", description: "Communication therapy, AAC support, and swallowing assessments." },
-        { providerName: "Harbor Minds", serviceType: "Psychology", location: "Forster", description: "Therapeutic supports for mental health and behaviour support." },
-      ];
-      const stmt = db.prepare("INSERT INTO providers (providerName, serviceType, location, description, createdBy) VALUES (?,?,?,?,NULL)");
-      demo.forEach((p) => stmt.run([p.providerName, p.serviceType, p.location, p.description]));
-      stmt.finalize();
-      console.log(`Seeded demo providers (${demo.length})`);
-    }
-  });
 });
 
 // --------------------- AUTH MIDDLEWARE ---------------------
@@ -162,37 +141,28 @@ app.post("/chatbot", async (req, res) => {
   );
 
   if (providerIntent) {
-    // Tokenize and search by words across provider fields
-    const stop = new Set(["find", "provider", "providers", "near", "around", "the", "in", "at", "for"]);
-    const words = q
-      .replace(/[^a-z0-9\s]/g, " ")
-      .split(/\s+/)
-      .filter((w) => w && w.length >= 3 && !stop.has(w));
+    // Try to match providers by name, serviceType, or location
+    const like = `%${q.replace(/%/g, "")}%`;
+    db.all(
+      `SELECT providerName, serviceType, location FROM providers
+       WHERE lower(providerName) LIKE ? OR lower(serviceType) LIKE ? OR lower(location) LIKE ?
+       LIMIT 5`,
+      [like, like, like],
+      (err, rows) => {
+        if (err) {
+          return res.json({ reply: "Sorry, I couldn't search providers right now." });
+        }
+        if (!rows || rows.length === 0) {
+          return res.json({ reply: "I couldn't find matching providers. Try a different service or location." });
+        }
 
-    const searchWords = words.length ? words : [q];
-    const clauses = searchWords
-      .map(() => "(lower(providerName) LIKE ? OR lower(serviceType) LIKE ? OR lower(location) LIKE ?)")
-      .join(" OR ");
-    const sql = `SELECT providerName, serviceType, location FROM providers WHERE ${clauses} LIMIT 5`;
-    const params = searchWords.flatMap((w) => {
-      const like = `%${w.replace(/%/g, "")}%`;
-      return [like, like, like];
-    });
-
-    db.all(sql, params, (err, rows) => {
-      if (err) {
-        return res.json({ reply: "Sorry, I couldn't search providers right now." });
+        const list = rows
+          .map((r) => `- ${r.providerName} — ${r.serviceType} (${r.location})`)
+          .join("\n");
+        const reply = `Here are some providers I found:\n${list}`;
+        return res.json({ reply });
       }
-      if (!rows || rows.length === 0) {
-        return res.json({ reply: "I couldn't find matching providers. Try a different service or location." });
-      }
-
-      const list = rows
-        .map((r) => `- ${r.providerName} - ${r.serviceType} (${r.location})`)
-        .join("\n");
-      const reply = `Here are some providers I found:\n${list}`;
-      return res.json({ reply });
-    });
+    );
     return; // respond in callback
   }
 
@@ -262,4 +232,3 @@ async function callOpenAIChat(model, apiKey, systemPrompt, userMessage) {
 // --------------------- SERVER START ---------------------
 
 app.listen(PORT, () => console.log(`Backend running on http://localhost:${PORT}`));
-

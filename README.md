@@ -48,3 +48,20 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+## Chatbot LLM Setup
+
+The chatbot UI now calls the backend `/chatbot` endpoint. By default, the backend uses a small FAQ/local logic. To enable real LLM answers via OpenAI:
+
+- Set environment variables when starting the backend:
+
+  - `OPENAI_API_KEY` — your OpenAI API key
+  - `OPENAI_MODEL` (optional) — defaults to `gpt-4o-mini`
+
+Example (PowerShell):
+
+```
+$env:OPENAI_API_KEY="sk-..."; $env:OPENAI_MODEL="gpt-4o-mini"; npm run dev --prefix backend
+```
+
+The mobile app uses `API_BASE_URL` in `app/config.ts`. For device testing, change it from `http://localhost:4000` to your machine's LAN IP (e.g. `http://192.168.1.10:4000`).
