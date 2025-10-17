@@ -1,15 +1,14 @@
-// app/(tabs)/employee_home.tsx
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   Alert,
   Image,
+  Platform,
   SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  Platform,
 } from "react-native";
 import { useAuth } from "../Auth/Authentication";
 
@@ -34,16 +33,33 @@ export default function EmployeeHome() {
     danger?: boolean;
   }) => (
     <TouchableOpacity onPress={onPress} style={styles.row}>
-      <Text style={[styles.rowText, danger && { color: "#e11d48", fontWeight: "700" }]}>
+      <Text
+        style={[
+          styles.rowText,
+          danger && { color: "#e11d48", fontWeight: "700" },
+        ]}
+      >
         {title}
       </Text>
       <Text style={[styles.chevron, danger && { color: "#e11d48" }]}>{">"}</Text>
     </TouchableOpacity>
   );
 
+  const goPending = () =>
+    router.push(
+      { pathname: "/messages", params: { status: "pending" } } as any
+    );
+
+  const goPast = () =>
+    router.push({ pathname: "/messages", params: { status: "past" } } as any);
+
+  const goSupport = () =>
+    router.push("/chatbot" as any); // change to your Support route if different
+
   const handleLogout = () => {
     if (Platform.OS === "web") {
-      const ok = typeof window !== "undefined" && window.confirm("Log out now?");
+      const ok =
+        typeof window !== "undefined" && window.confirm("Log out now?");
       if (ok) logout();
       return;
     }
@@ -53,7 +69,7 @@ export default function EmployeeHome() {
         text: "Log out",
         style: "destructive",
         onPress: async () => {
-          await logout(); // AuthGate will handle redirect automatically
+          await logout();
         },
       },
     ]);
@@ -67,7 +83,10 @@ export default function EmployeeHome() {
           <Text style={styles.name}>{localUser.name}</Text>
         </View>
 
-        
+        {/* NEW rows */}
+        <Row title="Pending Messages" onPress={goPending} />
+        <Row title="Past Messages" onPress={goPast} />
+        <Row title="Support" onPress={goSupport} />
 
         <Row title="Log out" onPress={handleLogout} danger />
       </View>
