@@ -18,21 +18,27 @@ const BLUE = "#1E90FF";
 export default function LoginScreen() {
   const { login } = useAuth();
   const router = useRouter();
+
   const [staffId, setStaffId] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");   // ⬅️ inline error message
 
   const onSubmit = async () => {
     if (!staffId.trim() || !password.trim()) {
       Alert.alert("Missing info", "Please enter both Staff ID and Password.");
       return;
     }
+
     setBusy(true);
+    setError(""); // clear any old error
+
     try {
       await login(staffId.trim(), password);
       router.replace("/employee_home");
-    } catch (e: any) {
-      Alert.alert("Login failed", e?.message ?? "Please try again.");
+    } catch {
+      // ⬅️ show inline banner instead of an Alert
+      setError("Wrong Credentials: Invalid username or password");
     } finally {
       setBusy(false);
     }
@@ -49,6 +55,7 @@ export default function LoginScreen() {
           style={styles.logo}
           resizeMode="contain"
         />
+
         <Text style={styles.title}>
           Please Login with your{"\n"}
           <Text style={{ fontWeight: "800" }}>Staff ID</Text>
@@ -79,6 +86,14 @@ export default function LoginScreen() {
             returnKeyType="go"
             onSubmitEditing={onSubmit}
           />
+
+          {/* 🔴 Inline error banner */}
+          {error ? (
+            <View style={styles.errorBox} accessibilityRole="alert">
+              <Text style={styles.errorTitle}>Wrong Credentials</Text>
+              <Text style={styles.errorMsg}>Invalid username or password</Text>
+            </View>
+          ) : null}
 
           <TouchableOpacity
             style={[styles.btn, busy && { opacity: 0.7 }]}
@@ -135,6 +150,30 @@ const styles = StyleSheet.create({
     fontSize: 16,
     backgroundColor: "#fff",
   },
+
+  // 🔴 Error banner styles (matches your reference)
+  errorBox: {
+    borderWidth: 1,
+    borderColor: "#e11d48",
+    backgroundColor: "#ffe4e6",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    width: "100%",
+    marginTop: 12,
+  },
+  errorTitle: {
+    color: "#b91c1c",
+    fontWeight: "700",
+    textAlign: "center",
+    marginBottom: 2,
+  },
+  errorMsg: {
+    color: "#991b1b",
+    textAlign: "center",
+    fontSize: 12,
+  },
+
   btn: {
     marginTop: 14,
     height: 44,
@@ -145,4 +184,3 @@ const styles = StyleSheet.create({
   },
   btnText: { color: "#fff", fontWeight: "700", fontSize: 16 },
 });
-

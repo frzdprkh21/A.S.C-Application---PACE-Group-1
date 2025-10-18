@@ -1,194 +1,135 @@
-// app/messages.tsx
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useMemo, useState } from "react";
-import {
-    FlatList,
-    SafeAreaView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-} from "react-native";
-
-type MessageStatus = "pending" | "past";
-
-type Msg = {
-  id: string;
-  from: string;
-  subject: string;
-  preview: string;
-  date: string; // ISO or friendly string
-  status: MessageStatus;
-};
+import { useRouter } from "expo-router";
+import { FlatList, Image, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const BLUE = "#1E90FF";
-const LINE = "#e5e7eb";
+
+const messages = [
+  {
+    id: "1",
+    name: "Camila Kelly",
+    text: "Would you like to speak to a Support Coordinator?",
+    avatar: require("../assets/images/example_profile.png"),
+  },
+  {
+    id: "2",
+    name: "Camila Kelly",
+    text: "Thanks for confirming — your case has been closed.",
+    avatar: require("../assets/images/example_profile.png"),
+  },
+  {
+    id: "3",
+    name: "Camila Kelly",
+    text: "We’ve updated your service plan as requested.",
+    avatar: require("../assets/images/example_profile.png"),
+  },
+  {
+    id: "4",
+    name: "Camila Kelly",
+    text: "Glad we could help! Let us know if you have more questions.",
+    avatar: require("../assets/images/example_profile.png"),
+  },
+  {
+    id: "5",
+    name: "Camila Kelly",
+    text: "Your request has been confirmed!",
+    avatar: require("../assets/images/example_profile.png"),
+  },
+];
 
 export default function Messages() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ status?: MessageStatus }>();
-  const initialTab = (params.status === "past" ? "past" : "pending") as MessageStatus;
-
-  // demo data
-  const [items, setItems] = useState<Msg[]>([
-    {
-      id: "m1",
-      from: "Alex Parker",
-      subject: "Plan review help",
-      preview: "Hi, I need help understanding my plan review...",
-      date: "2025-09-10",
-      status: "pending",
-    },
-    {
-      id: "m2",
-      from: "Jill Nguyen",
-      subject: "Provider list request",
-      preview: "Could you send the updated list of local providers?",
-      date: "2025-09-08",
-      status: "pending",
-    },
-    {
-      id: "m3",
-      from: "Coast Allied",
-      subject: "Follow-up scheduled",
-      preview: "Thanks, we’ve booked a follow-up for next week.",
-      date: "2025-08-28",
-      status: "past",
-    },
-  ]);
-
-  const [tab, setTab] = useState<MessageStatus>(initialTab);
-
-  const data = useMemo(() => items.filter((m) => m.status === tab), [items, tab]);
-
-  const markDone = (id: string) => {
-    setItems((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, status: "past" } : m))
-    );
-  };
-
-  const renderRow = ({ item }: { item: Msg }) => (
-    <TouchableOpacity
-      style={styles.row}
-      onPress={() => {
-        // (optional) navigate to a detail screen later
-        // router.push({ pathname: "/message/[id]", params: { id: item.id } } as any);
-      }}
-    >
-      <View style={{ flex: 1 }}>
-        <Text style={styles.from}>{item.from}</Text>
-        <Text style={styles.subject}>{item.subject}</Text>
-        <Text style={styles.preview} numberOfLines={1}>
-          {item.preview}
-        </Text>
-      </View>
-
-      <View style={styles.rowRight}>
-        <Text style={styles.date}>{item.date}</Text>
-        {item.status === "pending" && (
-          <TouchableOpacity onPress={() => markDone(item.id)} style={styles.doneBtn}>
-            <Text style={styles.doneText}>Mark done</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-    </TouchableOpacity>
-  );
 
   return (
-    <SafeAreaView style={styles.screen}>
-      {/* Header */}
+    <SafeAreaView style={styles.container}>
+      {/* Header*/}
       <View style={styles.header}>
-        <Text style={styles.title}>Messages</Text>
-      </View>
+    <TouchableOpacity
+      onPress={() => router.replace("/employee_home")}
+      style={styles.backButton}
+    >
+      <Text style={styles.backArrow}>←</Text>
+    </TouchableOpacity>
 
-      {/* Tabs */}
-      <View style={styles.tabs}>
-        <TouchableOpacity
-          style={[styles.tab, tab === "pending" && styles.tabActive]}
-          onPress={() => setTab("pending")}
-        >
-          <Text style={[styles.tabText, tab === "pending" && styles.tabTextActive]}>
-            Pending
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, tab === "past" && styles.tabActive]}
-          onPress={() => setTab("past")}
-        >
-          <Text style={[styles.tabText, tab === "past" && styles.tabTextActive]}>
-            Past
-          </Text>
-        </TouchableOpacity>
-      </View>
+    <Image
+      source={require("../assets/images/logo.png")}
+      style={styles.logo}
+      resizeMode="contain"
+    />
 
-      {/* List */}
-      {data.length === 0 ? (
-        <View style={styles.empty}>
-          <Text style={styles.emptyText}>
-            {tab === "pending" ? "No pending messages." : "No past messages."}
-          </Text>
-        </View>
-      ) : (
-        <FlatList
-          data={data}
-          keyExtractor={(m) => m.id}
-          renderItem={renderRow}
-          ItemSeparatorComponent={() => <View style={styles.sep} />}
-          contentContainerStyle={{ paddingBottom: 16 }}
-        />
-      )}
+    <View style={{ width: 45 }} />
+  </View>
+
+      <Text style={styles.pageTitle}>Messages</Text>
+
+      <FlatList
+        data={messages}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <View style={styles.messageRow}>
+            <Image source={item.avatar} style={styles.avatar} />
+            <View style={styles.textContainer}>
+              <Text style={styles.name}>{item.name}</Text>
+              <Text style={styles.text}>{item.text}</Text>
+            </View>
+          </View>
+        )}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        contentContainerStyle={{ paddingBottom: 20 }}
+      />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: "#fff" },
+  container: { flex: 1, backgroundColor: "#fff", padding: 16 },
+  
   header: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: LINE,
-  },
-  title: { fontSize: 18, fontWeight: "700" },
-  tabs: {
     flexDirection: "row",
-    gap: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: LINE,
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 10,
   },
-  tab: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: LINE,
-    backgroundColor: "#fff",
+backButton: {
+  width: 50,
+  height: 50,
+  alignItems: "center",
+  justifyContent: "center",
+},
+
+backArrow: {
+  fontSize: 36,       
+  fontWeight: "900",   
+  color: BLUE,
+  lineHeight: 42,
+  textShadowColor: BLUE,  
+  textShadowOffset: { width: 0.5, height: 0.5 },
+  textShadowRadius: 1.5,
+},
+  logo: {
+    width: 160,
+    height: 60,
   },
-  tabActive: { borderColor: BLUE, backgroundColor: "#eaf3ff" },
-  tabText: { color: "#111827", fontWeight: "600" },
-  tabTextActive: { color: BLUE },
-  row: {
+  pageTitle: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: BLUE,
+    marginVertical: 10,
+  },
+  messageRow: {
     flexDirection: "row",
     alignItems: "flex-start",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
     backgroundColor: "#fff",
-  },
-  from: { fontSize: 14, fontWeight: "700", color: "#111827" },
-  subject: { fontSize: 13, color: "#1f2937", marginTop: 2 },
-  preview: { fontSize: 12, color: "#6b7280", marginTop: 2 },
-  rowRight: { alignItems: "flex-end", marginLeft: 12 },
-  date: { fontSize: 11, color: "#6b7280", marginBottom: 6 },
-  doneBtn: {
-    paddingVertical: 6,
+    borderRadius: 10,
+    paddingVertical: 12,
     paddingHorizontal: 8,
-    backgroundColor: BLUE,
-    borderRadius: 8,
   },
-  doneText: { color: "#fff", fontSize: 12, fontWeight: "700" },
-  sep: { height: 1, backgroundColor: LINE },
-  empty: { flex: 1, alignItems: "center", justifyContent: "center" },
-  emptyText: { color: "#6b7280" },
+  avatar: { width: 48, height: 48, borderRadius: 24, marginRight: 10 },
+  textContainer: { flex: 1 },
+  name: { fontWeight: "700", fontSize: 15, color: "#111827" },
+  text: { fontSize: 13, color: "#374151", marginTop: 2 },
+  separator: {
+    height: 1,
+    backgroundColor: "#E5E7EB",
+    marginVertical: 6,
+  },
 });
